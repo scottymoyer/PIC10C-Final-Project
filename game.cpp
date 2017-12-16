@@ -12,15 +12,21 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 //Constructs an empty matrix of specified row x columns and sets numships and health
 Board::Board(int r, int c, int s){
     numrows = r;
     numcols = c;
     numships = s;
-    health = s;
+    health = 0;
     
     shipnames.erase(shipnames.begin()+numships, shipnames.end());
+    shipsizes.erase(shipsizes.begin()+numships, shipsizes.end());
+    
+    for(auto it : shipsizes){
+        health += it;
+    }
     
     
     matrix.resize(numcols);
@@ -66,6 +72,18 @@ void Board::minushealth(){
     health-=1;
 }
 
+void Board::minusshiphealth(int k){
+    shipsizes[k]-=1;
+}
+
+bool Board::sunk(int k){
+    if(shipsizes[k]==0){
+        return true;
+    }
+    else
+        return false;
+}
+
 //Checks for valid coordinate
 bool Board::notvalidcoordinate(int x, int y){
     if(y>numrows || y<1 || x>numcols || x<1){
@@ -82,6 +100,7 @@ AttackBoard::AttackBoard(int r, int c, int s) : Board(r,c,s){};
 DefenseBoard::DefenseBoard(int r, int c, int s) : Board(r,c,s){};
 
 //Randomly sets ships for the enemy
+//Checks to see if coordinates are occupied before placing ship
 void AttackBoard::setships(){
     for(int k=0; k<numships; k++){
         int rx = rand() % numcols;
@@ -90,19 +109,81 @@ void AttackBoard::setships(){
             k-=1;
             continue;
         }
-        matrix[rx][ry] = (4*k)+1;
+        int dir = rand() % 4;
+        bool open = true;
+
+        if(dir%4==0){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(!((rx+i)>=0 && (rx+i)<numcols && matrix[rx+i][ry]==0))
+                    open = false;
+            }
+        }
+        if(dir%4==1){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(!((rx-i)>=0 && (rx-i)<numcols && matrix[rx-i][ry]==0))
+                    open = false;
+            }
+        }
+        if(dir%4==2){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(!((ry+i)>=0 && (ry+i)<numrows && matrix[rx][ry+i]==0))
+                    open = false;
+            }
+        }
+        if(dir%4==3){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(!((ry-i)>=0 && (ry-i)<numrows && matrix[rx][ry-i]==0))
+                    open = false;
+            }
+        }
+        if(open==false){
+            k-=1;
+            continue;
+        }
+        else{
+            if(dir%4==0){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[rx+i][ry] = (4*k)+1;
+                }
+            }
+            if(dir%4==1){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[rx-i][ry] = (4*k)+1;
+                }
+            }
+            if(dir%4==2){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[rx][ry+i] = (4*k)+1;
+                }
+            }
+            if(dir%4==3){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[rx][ry-i] = (4*k)+1;
+                }
+            }
+        }
     }
 }
 
 //Takes in user input to set ships on defense board
+//User inputs the (x,y) coordinate for one end of the ship and then the other
+//Prompts user to re-input coordinates if the coordinates are not valid for the corresponding ship or if the coordinates are already occupied
 void DefenseBoard::setships(){
     for(int k=0; k<numships; k++){
-        int xcoord, ycoord;
-        std::cout<<"Enter the X-coordinate for your "<< shipnames[k] << ": ";
+        int xcoord, ycoord, xcoord2, ycoord2;
+        std::cout<<"The length of this ship is " << shipsizes[k] << ".\n";
+        std::cout<<"Enter the X-coordinate for one end of your "<< shipnames[k] << ": ";
         std::cin>>xcoord;
         std::cin.ignore();
-        std::cout<<"Enter the Y-coordinate for your "<< shipnames[k] << ": ";
+        std::cout<<"Enter the Y-coordinate for one end of your "<< shipnames[k] << ": ";
         std::cin>>ycoord;
+        std::cin.ignore();
+        std::cout<<std::endl;
+        std::cout<<"Enter the X-coordinate for the other end of your "<< shipnames[k] << ": ";
+        std::cin>>xcoord2;
+        std::cin.ignore();
+        std::cout<<"Enter the Y-coordinate for the other end of your "<< shipnames[k] << ": ";
+        std::cin>>ycoord2;
         std::cin.ignore();
         std::cout<<std::endl;
         
@@ -112,12 +193,68 @@ void DefenseBoard::setships(){
             k-=1;
             continue;
         }
-        if(matrix[xcoord-1][ycoord-1]>0){
-            std::cout<<"Please enter different coordinates for this ship.\n";
+        else if(ycoord2>numrows || ycoord2<1 || xcoord2>numcols || xcoord2<1){
+            std::cout<<"Please enter valid coordinates for this ship.\n";
             k-=1;
             continue;
         }
-        matrix[xcoord-1][ycoord-1]=(4*k)+1;
+        else if(!(abs(xcoord-xcoord2)==shipsizes[k]-1 && ycoord==ycoord2) && !(abs(ycoord-ycoord2)==shipsizes[k]-1 && xcoord==xcoord2)){
+            std::cout<<"Please enter valid coordinates for this ship.\n";
+            k-=1;
+            continue;
+        }
+        
+        bool open = true;
+        if(xcoord2-xcoord>0){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(matrix[xcoord+i-1][ycoord-1]!=0)
+                    open = false;
+            }
+        }
+        if(xcoord2-xcoord<0){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(matrix[xcoord-i-1][ycoord-1]!=0)
+                    open = false;
+            }
+        }
+        if(ycoord2-ycoord>0){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(matrix[xcoord-1][ycoord+i-1]!=0)
+                    open = false;
+            }
+        }
+        if(ycoord2-ycoord<0){
+            for(int i=1; i<shipsizes[k]; i++){
+                if(matrix[xcoord-1][ycoord-i-1]!=0)
+                    open = false;
+            }
+        }
+        if(open==false){
+            k-=1;
+            continue;
+        }
+        else{
+            if(xcoord2-xcoord>0){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[xcoord+i-1][ycoord-1]=(4*k)+1;
+                }
+            }
+            if(xcoord2-xcoord<0){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[xcoord-i-1][ycoord-1]=(4*k)+1;
+                }
+            }
+            if(ycoord2-ycoord>0){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[xcoord-1][ycoord+i-1]=(4*k)+1;
+                }
+            }
+            if(ycoord2-ycoord<0){
+                for(int i=0; i<shipsizes[k]; i++){
+                    matrix[xcoord-1][ycoord-i-1]=(4*k)+1;
+                }
+            }
+        }
     }
 }
 
@@ -148,6 +285,7 @@ void AttackBoard::printboard(){
             if(j!=(numcols-1)){
                 std::cout<<" | ";
             }
+            
         }
         std::cout<<std::endl;
         if(i!=(numrows-1)){
