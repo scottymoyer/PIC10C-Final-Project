@@ -55,6 +55,23 @@ protected:
     int health;
 };
 
+//Derived classes of Board. Each uses its own setships and printboard function, so they must be defined for each
+class AttackBoard : public Board {
+public:
+    AttackBoard(int r, int c, int s);
+    virtual ~AttackBoard();
+    virtual void setships();
+    virtual void printboard();
+    
+};
+
+class DefenseBoard : public Board {
+public:
+    DefenseBoard(int r, int c, int s);
+    virtual ~DefenseBoard();
+    virtual void setships();
+    virtual void printboard();
+};
 
 
 
