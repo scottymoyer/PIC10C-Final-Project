@@ -1,77 +1,61 @@
 //
-//  game.hpp
-//  Battleship
+//  game.h
+//  BattleshipFinalProject
 //
-//  Created by Scott Moyer on 11/7/17.
+//  Created by Scott Moyer on 12/02/17.
 //  Copyright © 2017 Scott Moyer. All rights reserved.
 //
 
-#ifndef game_h
-#define game_h
+#ifndef game_hpp
+#define game_hpp
 
+#include <stdio.h>
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
 #include <string>
 #include <vector>
 
-using namespace std;
 
-
-/*const int numrows = 6;
-const int numcols = 4;
-const int numships = 3;
-*/
-
-class Board {
+class Board{
 public:
     
-    Board();
+    //Constructor and Destructor
     Board(int r, int c, int s);
+    virtual ~Board();
     
-    void printdefense();
-    void printattack();
+    //Pure virtual functions to be defined by each subclass
+    virtual void setships(){};
+    virtual void printboard(){};
     
-    void setships(int x, int y, int k);
-    int getattackvalue(int x, int y);
-    int getdefensevalue(int x, int y);
+    //Accessors
+    int getvalue(int x, int y) const;
+    std::string getshipname(int x, int y) const;
+    int getnumrows() const;
+    int getnumcols() const;
+    int getnumships() const;
+    int gethealth() const;
     
-    string getattackship(int x, int y);
-    string getdefenseship(int x, int y);
-    
-    
+    //Checks for valid coordinate
     bool notvalidcoordinate(int x, int y);
     
-    int getnumrows();
-    int getnumcols();
-    int getnumships();
+    //Fires at a coordinate
+    void fire(int x, int y);
     
-    void attack(int x, int y);
-    void defend(int x, int y);
-    
-    int getmyhealth();
-    int getenemyhealth();
-    void minusmyhealth();
-    void minusenemyhealth();
-    
-private:
-    int** defensearray = NULL;
-    int** attackarray = NULL;
-    int* shiplist = NULL;
-    string shipnames[5] = {"Jetski", "Submarine", "Pirate Ship", "Yacht", "Cruiseliner"};
+    //Subtracts health if hit
+    void minushealth();
+
+    //These variables are common to both subclasses and need to be accessed, therefore they are protected
+protected:
+    std::vector<std::vector<int>> matrix;
+    std::vector<std::string> shipnames = {"Submarine", "Fishing Boat", "Yacht", "Cruiseliner", "Pirate Ship", "Motorboat", "Jetski", "Houseboat", "Kayak", "Rowboat"};
     int numrows;
     int numcols;
-    //int defensearray [numrows][numcols];
-    //int attackarray [numrows][numcols];
-    //int myhealth = numships;
-    //int enemyhealth = numships;
     int numships;
-    int myhealth;
-    int enemyhealth;
-    
+    int health;
 };
 
 
 
 
-#endif /* game_h */
+#endif /* game_hpp */
