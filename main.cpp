@@ -120,7 +120,7 @@ int main() {
     }
     
     //Different possible outcomes
-    if(ab->gethealth()==0 && ab->gethealth()==0){
+    if(ab->gethealth()==0 && db->gethealth()==0){
         std::cout<<"Tie! You both sunk all of each other's ships!\n";
     }
     else if(db->gethealth()==0){
