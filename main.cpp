@@ -18,23 +18,23 @@ int main() {
     srand(int(time(0)));
     std::cout<<"Welcome to Battleship!\n\n";
     std::cout<<"In this version of Battleship, you can choose the number of rows, columns, and ships.\n";
-    std::cout<<"The default game settings are a 5x5 board and 5 battleships.\n";
+    std::cout<<"The default game settings are a 8x8 board and 4 battleships.\n";
     std::cout<<"Would you like to choose your own game settings?\nEnter 'y' or 'n': ";
     char ans;
     int r,c,s;
     std::cin>>ans;
     std::cin.ignore();
     if(ans=='y'){
-        std::cout<<"Okay. How many rows would you like? (Up to 10) ";
+        std::cout<<"Okay. How many rows would you like? (minimum 3, max 10) ";
         std::cin>>r;
         std::cin.ignore();
-        std::cout<<"How many columns? (Up to 10) ";
+        std::cout<<"How many columns? (minimum 3, max 10) ";
         std::cin>>c;
         std::cin.ignore();
         std::cout<<"How many battleships? (Up to 10) ";
         std::cin>>s;
         std::cin.ignore();
-        while(s > r*c || s > 10){
+        while((9*s) > r*c || s > 10){
             std::cout<<"That's too many battleships. How many battleships would you like? (Up to 10) ";
             std::cin>>s;
             std::cin.ignore();
@@ -42,9 +42,10 @@ int main() {
         std::cout<<std::endl;
     }
     else {
-        r=5;
-        c=5;
-        s=5;
+        std::cout<<std::endl;
+        r=8;
+        c=8;
+        s=4;
     }
     
     //Creates attack and defense boards
@@ -89,9 +90,18 @@ int main() {
             std::cout<<"You missed!\n\n";
         }
         else if(ab->getvalue(xattackcoord, yattackcoord)%4==3){
-            std::cout<<"Hit! Target acquired.\nYou sunk the enemy's " << ab->getshipname(xattackcoord, yattackcoord)<< ".\n";
+            std::cout<<"Hit! Target acquired.\n";
             ab->minushealth();
-            std::cout<<"Enemy has "<<ab->gethealth()<<" ships remaining.\n\n";
+            int k = ab->getvalue(xattackcoord, yattackcoord)/4;
+            ab->minusshiphealth(k);
+            if(ab->sunk(k)){
+                std::cout<<"You sunk the enemy's " << ab->getshipname(xattackcoord, yattackcoord)<< ".\n";
+            }
+            else {
+                std::cout<<"You hit the enemy's " << ab->getshipname(xattackcoord, yattackcoord)<< ".\n";
+            }
+            
+            std::cout<<"Enemy has "<<ab->gethealth()<<" health remaining.\n\n";
         }
         ab->printboard();
         
