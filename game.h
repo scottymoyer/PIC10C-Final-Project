@@ -44,11 +44,16 @@ public:
     
     //Subtracts health if hit
     void minushealth();
+    void minusshiphealth(int k);
+    
+    //Checks if a ship has been sunk
+    bool sunk(int k);
 
     //These variables are common to both subclasses and need to be accessed, therefore they are protected
 protected:
     std::vector<std::vector<int>> matrix;
-    std::vector<std::string> shipnames = {"Submarine", "Fishing Boat", "Yacht", "Cruiseliner", "Pirate Ship", "Motorboat", "Jetski", "Houseboat", "Kayak", "Rowboat"};
+    std::vector<std::string> shipnames = {"Fishing Boat", "Submarine", "Yacht", "Pirate Ship", "Cruiseliner", "Jetski", "Motorboat", "Rowboat", "Kayak", "Houseboat"};
+    std::vector<int> shipsizes = {2,3,4,3,5,2,3,4,3,5};
     int numrows;
     int numcols;
     int numships;
